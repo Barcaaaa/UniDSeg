@@ -116,11 +116,11 @@ def train(cfg, output_dir='', run_name=''):
                                      postfix='_2d',
                                      max_to_keep=cfg.TRAIN.MAX_TO_KEEP)
     # checkpoint_data_2d = checkpointer_2d.load(
-    #     '/data/wuyao/code/UniDSeg/output/usa_singapore/UniDSeg_ViT-L-14/model_2d_060000.pth', resume=False)
+    #     '/data/user1/code/UniDSeg/output/usa_singapore/UniDSeg_ViT-L-14/model_2d_060000.pth', resume=False)
     # checkpoint_data_2d = checkpointer_2d.load(
-    #     '/data/wuyao/code/UniDSeg/output/day_night/UniDSeg_ViT-L-14/model_2d_100000.pth', resume=False)
+    #     '/data/user1/code/UniDSeg/output/day_night/UniDSeg_ViT-L-14/model_2d_100000.pth', resume=False)
     checkpoint_data_2d = checkpointer_2d.load(
-        '/data1/wuyao/code/UniDSeg/output/a2d2_skitti/UniDSeg_ViT-L-14/model_2d_150000.pth', resume=False)
+        '/data1/user1/code/UniDSeg/output/a2d2_skitti/UniDSeg_ViT-L-14/model_2d_150000.pth', resume=False)
     checkpointer_3d = CheckpointerV2(model_3d,
                                      # optimizer=optimizer_3d,
                                      # scheduler=scheduler_3d,
@@ -129,11 +129,11 @@ def train(cfg, output_dir='', run_name=''):
                                      postfix='_3d',
                                      max_to_keep=cfg.TRAIN.MAX_TO_KEEP)
     # checkpoint_data_3d = checkpointer_3d.load(
-    #     '/data/wuyao/code/UniDSeg/output/usa_singapore/UniDSeg_ViT-L-14/model_3d_060000.pth', resume=False)
+    #     '/data/user1/code/UniDSeg/output/usa_singapore/UniDSeg_ViT-L-14/model_3d_060000.pth', resume=False)
     # checkpoint_data_3d = checkpointer_3d.load(
-    #     '/data/wuyao/code/UniDSeg/output/day_night/UniDSeg_ViT-L-14/model_3d_100000.pth', resume=False)
+    #     '/data/user1/code/UniDSeg/output/day_night/UniDSeg_ViT-L-14/model_3d_100000.pth', resume=False)
     checkpoint_data_3d = checkpointer_3d.load(
-        '/data1/wuyao/code/UniDSeg/output/a2d2_skitti/UniDSeg_ViT-L-14/model_3d_150000.pth', resume=False)
+        '/data1/user1/code/UniDSeg/output/a2d2_skitti/UniDSeg_ViT-L-14/model_3d_150000.pth', resume=False)
     ckpt_period = cfg.TRAIN.CHECKPOINT_PERIOD
 
     # build tensorboard logger (optionally by comment)
