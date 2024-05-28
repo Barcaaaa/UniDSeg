@@ -1,0 +1,48 @@
+MODEL_2D:
+#  TYPE: "ViT-B-16"
+  TYPE: "ViT-L-14"
+  DUAL_HEAD: True
+  NUM_CLASSES: 6
+MODEL_3D:
+  TYPE: "SCN"
+  DUAL_HEAD: True
+  NUM_CLASSES: 6
+DATASET_SOURCE:
+  TYPE: "VirtualKITTISCN"
+  TRAIN: ("train",)
+  VirtualKITTISCN:
+    preprocess_dir: '/data/user2/xmuda-journal-dataset/virtual_kitti_preprocess_intensity/preprocess'
+    virtual_kitti_dir: '/data/user2/virtual_kitti'
+DATASET_TARGET:
+  TYPE: "SemanticKITTISCN"
+  TRAIN: ("train",)
+  VAL: ("val",)
+  TEST: ("test",)
+  SemanticKITTISCN:
+    preprocess_dir: '/data/user2/xmuda-journal-dataset/semantic_kitti_preprocess_intensity1/preprocess'
+    semantic_kitti_dir: '/data/user2/semantic_kitti'
+    merge_classes_style: "VirtualKITTI"
+DATALOADER:
+  NUM_WORKERS: 4
+OPTIMIZER:
+  TYPE: "Adam"
+  BASE_LR: 0.001
+SCHEDULER:
+  TYPE: "MultiStepLR"
+  MultiStepLR:
+    gamma: 0.1
+    milestones: (48000, 56000) # (12000, 16000) for ViT-B-16; (24000, 33000) for ViT-L-14
+  MAX_ITERATION: 60000 # 20000 for ViT-B-16; 39000 for ViT-L-14
+TRAIN:
+  BATCH_SIZE: 4  # 8 (for ViT-B-16); 4 (for ViT-L-14)
+  SUMMARY_PERIOD: 50
+  CHECKPOINT_PERIOD: 4000 # 2000 (for ViT-B-16); 3000 (for ViT-L-14)
+  CLASS_WEIGHTS: [1., 2.03402089, 1.20641905, 2.21588055, 2.59745666, 1.82057006]
+  XMUDA:
+    lambda_xm_src: 0.1
+    lambda_xm_trg: 0.01
+VAL:
+  BATCH_SIZE: 1
+  PERIOD: 4000  # 2000 (for ViT-B-16); 3000 (for ViT-L-14)
+
+OUTPUT_DIR: "/data1/user1/code/UniDSeg/output/vkitti_skitti/da/UniDSeg_ViT-L-14/"

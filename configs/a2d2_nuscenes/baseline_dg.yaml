@@ -1,0 +1,54 @@
+MODEL_2D:
+#  TYPE: "ViT-B-16"
+  TYPE: "ViT-L-14"
+  DUAL_HEAD: True
+  NUM_CLASSES: 8
+MODEL_3D:
+  TYPE: "SCN"
+  DUAL_HEAD: True
+  NUM_CLASSES: 8
+DATASET_SOURCE:
+  TYPE: "A2D2SCN"
+  TRAIN: ("train",)
+  A2D2SCN:
+    preprocess_dir: "/data/user2/xmuda-journal-dataset/a2d2_preprocess_intensity"
+    merge_classes_style: "A2D2_nuScenes"
+DATASET_TARGET:
+  TYPE: "NuScenesLidarSegSCN"
+  VAL: ("test_all",)
+  TEST: ("test_all",)
+  NuScenesLidarSegSCN:
+    preprocess_dir: '/data/user1/dataset/nuscenes/nuscenes_lidarseg_preprocess_merge/preprocess'
+    nuscenes_dir: '/data/user2/nuscenes'  # only front cam images are needed
+    merge_classes_style: "A2D2_nuScenes"
+    resize: (480, 302)
+DATALOADER:
+  NUM_WORKERS: 4
+OPTIMIZER:
+  TYPE: "Adam"
+  BASE_LR: 0.001
+SCHEDULER:
+  TYPE: "MultiStepLR"
+  MultiStepLR:
+    gamma: 0.1
+    milestones: (80000, 90000) # (80000, 90000) for ViT-B-16; (120000, 135000) for ViT-L-14
+  MAX_ITERATION: 100000 # 100000 for ViT-B-16; 150000 for ViT-L-14
+TRAIN:
+  BATCH_SIZE: 8  # 8 (for ViT-B-16); 4 (for ViT-L-14)
+  SUMMARY_PERIOD: 50
+  CHECKPOINT_PERIOD: 5000 # 5000 (for ViT-B-16); 7500 (for ViT-L-14)
+#  CLASS_WEIGHTS: [1.90654412, 2.05630212, 3.23149296, 1.0, 1.94517023, 1.04782715, 1.50830725, 3.12912668, 1.79175865]
+  CLASS_WEIGHTS: [1.92595212, 2.07891627, 3.27926651, 1.0, 1.96540517, 1.04885107, 1.51918949, 3.1747087]
+  XMUDA:
+    lambda_xm_src: 0.1
+VAL:
+  BATCH_SIZE: 8
+  PERIOD: 5000 # 5000 (for ViT-B-16); 7500 (for ViT-L-14)
+
+#OUTPUT_DIR: "/data1/user1/code/UniDSeg/output/a2d2_nuscenes/dg/ft_ViT-B-16/"
+#OUTPUT_DIR: "/data1/user1/code/UniDSeg/output/a2d2_nuscenes/dg/fz_ViT-B-16/"
+OUTPUT_DIR: "/data1/user1/code/UniDSeg/output/a2d2_nuscenes/dg/UniDSeg_ViT-B-16/"
+
+#OUTPUT_DIR: "/data1/user1/code/UniDSeg/output/a2d2_nuscenes/dg/ft_ViT-L-14/"
+#OUTPUT_DIR: "/data1/user1/code/UniDSeg/output/a2d2_nuscenes/dg/fz_ViT-L-14/"
+#OUTPUT_DIR: "/data1/user1/code/UniDSeg/output/a2d2_nuscenes/dg/UniDSeg_ViT-L-14/"
