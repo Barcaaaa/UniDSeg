@@ -185,7 +185,7 @@ def train(cfg, output_dir='', run_name=''):
 
     # 冻结除rein层以外的所有参数
     for name, param in model_2d.net_2d.image_backbone.named_parameters():
-        if 'reins' in name or 'prompt_generator' in name:
+        if 'LST' in name or 'MTP' in name:
             param.requires_grad = True
             param.lr = 0.1 * cfg.OPTIMIZER.BASE_LR
         else:
