@@ -74,18 +74,18 @@ def train(cfg, output_dir='', run_name=''):
 
     num_params = sum(param.numel() for param in model_2d.net_2d.image_backbone.parameters())
     print('#Parameters: {:.2e}'.format(num_params))
-    num_params_reins = []
-    num_params_pg = []
+    num_params_mtp = []
+    num_params_lst = []
     num_params_others = []
     for name, param in model_2d.net_2d.image_backbone.named_parameters():
-        if 'reins' in name:
-            num_params_reins.append(param.numel())
-        elif 'prompt_generator' in name:
-            num_params_pg.append(param.numel())
+        if 'prompting' in name:
+            num_params_mtp.append(param.numel())
+        elif 'tunability' in name:
+            num_params_lst.append(param.numel())
         else:
             num_params_others.append(param.numel())
-    print('#Parameters reins: {:.2e}\n'.format(sum(num_params_reins)),
-          '#Parameters pg: {:.2e}\n'.format(sum(num_params_pg)),
+    print('#Parameters MTP: {:.2e}\n'.format(sum(num_params_mtp)),
+          '#Parameters LST: {:.2e}\n'.format(sum(num_params_lst)),
           '#Parameters others: {:.2e}'.format(sum(num_params_others)))
 
     # build 3d model
@@ -184,7 +184,7 @@ def train(cfg, output_dir='', run_name=''):
 
     # 冻结除rein层以外的所有参数
     for name, param in model_2d.net_2d.image_backbone.named_parameters():
-        if 'LST' in name or 'MTP' in name:
+        if 'prompting' in name or 'tunability' in name:
             param.requires_grad = True
             param.lr = 0.1 * cfg.OPTIMIZER.BASE_LR
         else:
