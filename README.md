@@ -6,7 +6,7 @@
 ![framework](doc/framework.png)
 
 ## News
-* **2024-10** :loudspeaker: Our new work, [UniDSeg](https://proceedings.neurips.cc/paper_files/paper/2024/file/b762632135b16f1225672f9fe2a9740b-Paper-Conference.pdf).
+* **2024-10** :loudspeaker: Our new work, [UniDSeg](https://proceedings.neurips.cc/paper_files/paper/2024/file/b762632135b16f1225672f9fe2a9740b-Paper-Conference.pdf), has been accepted by NeurIPS 2024.
 * **2024-05** :rocket: We release the first version of code.
 
 ## TODO
