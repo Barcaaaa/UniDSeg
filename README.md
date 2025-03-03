@@ -3,7 +3,7 @@
 :fire: This is the official PyTorch implementation of our work. :fire:
 
 ## Overview
-![framework](doc/framework.jpg)
+![framework](doc/framework.png)
 
 ## News
 * **2024-10** :loudspeaker: Our new work, [UniDSeg](https://proceedings.neurips.cc/paper_files/paper/2024/file/b762632135b16f1225672f9fe2a9740b-Paper-Conference.pdf).
