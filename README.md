@@ -3,14 +3,14 @@
 :fire: This is the official PyTorch implementation of our work. :fire:
 
 ## Overview
-![framework](doc/framework.png)
+<img src="doc/framework.png" alt="framework" width="480">
 
 ## News
 * **2024-10** :loudspeaker: Our new work, [UniDSeg](https://proceedings.neurips.cc/paper_files/paper/2024/file/b762632135b16f1225672f9fe2a9740b-Paper-Conference.pdf), has been accepted by NeurIPS 2024.
-* **2024-05** :rocket: We release the first version of code.
+* **2024-05** :rocket: We release the first version of UniDSeg.
 
 ## TODO
-* :white_medium_square: Run all experiments use SAM.
+* :white_medium_square: Run all experiments using SAM.
 * :white_medium_square: Refactor the code.
 
 ## Getting Started
@@ -28,13 +28,13 @@ The implementation runs on
 - [mmsegmentation 1.2.2](https://github.com/open-mmlab/mmsegmentation)
 
 ### Preparation
-As for 3D networks, we use SpConv instead of SparseConvNet used in xMUDA_journal, which is faster to compute. We advise to create a new conda environment for installation. PyTorch and CUDA can be installed, and SpConv installed/compiled as follows:
+As for 3D networks, we use SpConv instead of SparseConvNet, which is used in xMUDA_journal, because it is faster to compute. We advise to create a new conda environment for installation. SpConv can be installed/compiled as follows:
 ```
 git clone https://github.com/traveller59/spconv, cd ./spconv, pip install -e .
 ```
 
 ### Pre-trained CLIP Models
-Download the pre-trained CLIP (ViT-B-16.pt, ViT-L-14.pt) and SAM (sam_vit_l.pth) models and save them to the ./pretrained folder. The download links can be found in [the official repo](https://github.com/openai/CLIP/blob/a1d071733d7111c9c014f024669f959182114e33/clip/clip.py#L30)
+Download the pre-trained CLIP (```ViT-B-16.pt```, ```ViT-L-14.pt```) and SAM (```sam_vit_l.pth```) models and save them to the ./pretrained folder. The download links can be found in [CLIP official repo](https://github.com/openai/CLIP/blob/a1d071733d7111c9c014f024669f959182114e33/clip/clip.py#L30) and [SAM official repo](https://github.com/facebookresearch/segment-anything).
 
 ### Dataset (Refer to [xMUDA_journal](https://github.com/valeoai/xmuda_journal))
 You need to perform preprocessing to generate the data for UniDSeg.
@@ -59,7 +59,7 @@ SemanticKITTI:
 
 VirtualKITTI:
 - Clone the repo from [VirtualKITTI website](https://github.com/VisualComputingInstitute/vkitti3D-dataset.git).
-- Download raw data and extract with following script.
+- Download raw data and extract with the following script.
   ```
   cd vkitti3D-dataset/tools
   mkdir path/to/virtual_kitti
@@ -94,9 +94,9 @@ cd <root dir of this repo>
 CUDA_VISIBLE_DEVICES=0 python -W ignore xmuda/train_sfda_clip_UniDSeg.py --cfg=configs/dataset_name/sfda.yaml
 CUDA_VISIBLE_DEVICES=0 python -W ignore xmuda/train_sfda_sam_UniDSeg.py --cfg=configs/dataset_name/sfda.yaml
 ```
-You can change the path OUTPUT_DIR in the config file `xxx.yaml` and `xxx_pl.yaml`.
+You can change the path OUTPUT_DIR in the config file `xxx.yaml` or `xxx_pl.yaml`.
 
-### Testing
+### Testing (e.g. DG task)
 You can run the testing with:
 ```
 cd <root dir of this repo>
@@ -117,7 +117,7 @@ CUDA_VISIBLE_DEVICES=0 python -W ignore xmuda/test_ft_clip.py \
     --pselab \
     DATASET_TARGET.TEST "('train',)"
 ```
-Note that we use the last model at final steps to exclude supervision from the validation set by picking the best weights. The pseudo labels and maximum probabilities are saved as ```.npy``` file.
+Note that we use the last model at the final steps to exclude supervision from the validation set by picking the best weights. The pseudo labels and maximum probabilities are saved as ```.npy``` file.
 
 Please edit the ```pselab_paths``` in the config file, e.g. ```configs/nuscenes/a2d2_skitti/da_pl.yaml```, to match your path of the generated pseudo-labels.
 Then start the training. The pseudo-label refinement (discard less confident pseudo-labels) is done when the dataloader is initialized.
