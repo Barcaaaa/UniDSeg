@@ -1,6 +1,7 @@
 MODEL_2D:
 #  TYPE: "ViT-B-16"
-  TYPE: "ViT-L-14"
+#  TYPE: "ViT-L-14"
+  TYPE: "SAM_ViT-L"
   NUM_CLASSES: 6
   DUAL_HEAD: True
 MODEL_3D:
