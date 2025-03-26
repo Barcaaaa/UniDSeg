@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import sys
-sys.path.append("/data/user1/code/UniDSeg")
+sys.path.append("/data1/wuyao/code/UniDSeg")
 
 import os
 import os.path as osp
@@ -14,7 +14,7 @@ import torch
 import torch.nn.functional as F
 from torch.utils.tensorboard import SummaryWriter
 
-from xmuda.common.solver.build import build_optimizer, build_optimizer_2d, build_optimizer_3d, build_scheduler
+from xmuda.common.solver.build import build_optimizer_2d, build_optimizer_2d_mod, build_optimizer_3d, build_scheduler
 from xmuda.common.utils.checkpoint import CheckpointerV2
 from xmuda.common.utils.logger import setup_logger
 from xmuda.common.utils.metric_logger import MetricLogger
@@ -99,7 +99,8 @@ def train(cfg, output_dir='', run_name=''):
 
     # build optimizer
     # optimizer_2d = build_optimizer(cfg, model_2d)  # for a2d2
-    optimizer_2d = build_optimizer_2d(cfg, model_2d)  # 0.1x
+    optimizer_2d = build_optimizer_2d(cfg, model_2d)  # for SAM
+    # optimizer_2d = build_optimizer_2d_mod(cfg, model_2d)  # for CLIP
     optimizer_3d = build_optimizer_3d(cfg, model_3d)
 
     # build lr scheduler
@@ -183,13 +184,13 @@ def train(cfg, output_dir='', run_name=''):
     else:
         class_weights_pl = None
 
-    # 冻结除rein层以外的所有参数
+    # 冻结除可学习层以外的所有参数
     for name, param in model_2d.net_2d.image_backbone.named_parameters():
         if 'prompting' in name or 'tunability' in name:
             param.requires_grad = True
         else:
             param.requires_grad = False
-        # print(name, param.requires_grad)
+        print(f"Parameter:'{name}'; requires_grad:{param.requires_grad}")
 
     setup_train()
 
