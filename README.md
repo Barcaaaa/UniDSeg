@@ -10,8 +10,9 @@
 * **2024-05** :rocket: We release the first version of UniDSeg.
 
 ## TODO
-* :white_medium_square: Run all experiments using SAM.
-* :white_medium_square: Refactor the code.
+* :white_medium_square: Run experiments using DINOv2.
+* :white_check_mark: Run experiments using SAM.
+* :white_check_mark: Refactor the original code.
 
 ## Getting Started
 
