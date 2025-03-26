@@ -1,6 +1,7 @@
 MODEL_2D:
 #  TYPE: "ViT-B-16"
-  TYPE: "ViT-L-14"
+#  TYPE: "ViT-L-14"
+  TYPE: "SAM_ViT-L"
   NUM_CLASSES: 6
   DUAL_HEAD: True
 MODEL_3D:
@@ -22,7 +23,7 @@ DATASET_TARGET:
     preprocess_dir: "/data/user2/nuscenes/nuscenes_lidarseg_intensity_preprocess/preprocess/preprocess"
     nuscenes_dir: "/data/user2/nuscenes"  # only front cam images are needed
 DATALOADER:
-  NUM_WORKERS: 4
+  NUM_WORKERS: 8
 OPTIMIZER:
   TYPE: "Adam"
   BASE_LR: 0.001
