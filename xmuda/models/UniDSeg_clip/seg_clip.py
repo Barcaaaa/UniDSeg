@@ -8,6 +8,7 @@ from mmseg.models.utils import Upsample, resize
 from mmcv.cnn import ConvModule
 
 from xmuda.models.UniDSeg_clip.clip_vis_model import CLIPVisionTransformer
+from xmuda.models.UniDSeg_clip.sam_vis_model import SAMViT
 
 
 class FPNHead(BaseDecodeHead):
@@ -72,23 +73,34 @@ class SegCLIP(nn.Module):
         super(SegCLIP, self).__init__()
 
         if backbone_2d == 'ViT-B-16':
-            pretrained_dir = '/data/user1/code/UniDSeg/pretrained/clip/ViT-B-16.pt'
+            pretrained_dir = '/data1/wuyao/code/UniDSeg/pretrained/clip/ViT-B-16.pt'
             self.width = 768
             self.image_backbone = CLIPVisionTransformer(input_resolution=640, patch_size=16, width=self.width, layers=12,
                                                         heads=12, output_dim=512, drop_path_rate=0.1, get_embeddings=False,
                                                         out_indices=[3, 5, 7, 11], pretrained=pretrained_dir)
         elif backbone_2d == 'ViT-L-14':
-            pretrained_dir = '/data/user1/code/UniDSeg/pretrained/clip/ViT-L-14.pt'
+            pretrained_dir = '/data1/wuyao/code/UniDSeg/pretrained/clip/ViT-L-14.pt'
             self.width = 1024
             self.image_backbone = CLIPVisionTransformer(input_resolution=640, patch_size=14, width=self.width, layers=24,
                                                            heads=16, output_dim=512, drop_path_rate=0.1, get_embeddings=False,
                                                            out_indices=[7, 11, 15, 23], pretrained=pretrained_dir)
+        elif backbone_2d == 'SAM_ViT-L':
+            pretrained_dir = '/data1/wuyao/code/UniDSeg/pretrained/sam/sam_vit_l_0b3195.pth'
+            self.width = 1024
+            init_cfg = dict(type='Pretrained', checkpoint=pretrained_dir)
+            self.image_backbone = SAMViT(img_size=1024, patch_size=16, embed_dim=self.width, depth=24,
+                                         num_heads=16, window_size=14, use_rel_pos=True, out_indices=[5, 11, 17, 23],
+                                         global_attn_indexes=[5, 11, 17, 23], init_cfg=init_cfg)
 
         # ----------------------------------------------------------------------------- #
         # Decoder
         # ----------------------------------------------------------------------------- #
-        self.fpn_head = FPNHead(feature_strides=[4, 8, 16, 32],
-                                in_channels=[self.width, self.width, self.width, self.width])
+        if backbone_2d == 'SAM_ViT-L':
+            self.fpn_head = FPNHead(feature_strides=[4, 8, 16, 32],
+                                    in_channels=[self.width, self.width, self.width, 256])
+        else:
+            self.fpn_head = FPNHead(feature_strides=[4, 8, 16, 32],
+                                    in_channels=[self.width, self.width, self.width, self.width])
         # TODO: Mask2former maybe get higher performance
 
     def forward(self, x, dep):

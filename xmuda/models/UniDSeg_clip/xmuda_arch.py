@@ -15,7 +15,7 @@ class Net2DSeg(nn.Module):
         super(Net2DSeg, self).__init__()
 
         # 2D network
-        if backbone_2d == 'ViT-B-16' or backbone_2d == 'ViT-L-14':
+        if backbone_2d == 'ViT-B-16' or backbone_2d == 'ViT-L-14' or backbone_2d == 'SAM_ViT-L':
             self.net_2d = SegCLIP(backbone_2d)
             feat_channels = 64
         else:

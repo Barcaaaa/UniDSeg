@@ -216,3 +216,124 @@ class LST(nn.Module):
         feats = feats + delta_feat
 
         return feats
+
+
+class LSTv1(nn.Module):
+    def __init__(
+        self,
+        num_layers: int,
+        embed_dims: int,
+        patch_size: int,
+        low_rank_dim: int = 32,
+        token_length: int = 50,
+        scale_init: float = 0.001,
+        r1: int = 1,
+        r2: int = 128,
+    ) -> None:
+        super(LSTv1, self).__init__()
+        self.num_layers = num_layers
+        self.embed_dims = embed_dims
+        self.patch_size = patch_size
+        self.low_rank_dim = low_rank_dim
+        self.token_length = token_length
+        self.scale_init = scale_init
+        self.r1 = r1
+        self.r2 = r2
+        self.create_model()
+
+    def create_model(self):
+        # 创建一个num_layers层，token长度为token_length，维度为embed_dims的可学习张量
+        self.learnable_tokens_a = nn.Parameter(
+            torch.empty([self.num_layers, self.token_length, self.low_rank_dim])
+        )
+        self.learnable_tokens_b = nn.Parameter(
+            torch.empty([self.num_layers, self.low_rank_dim, self.embed_dims])
+        )
+
+        self.down_layer1 = nn.Linear(self.embed_dims, self.r1, bias=False)
+        self.up_layer1 = nn.Linear(self.r1, self.embed_dims, bias=False)
+        self.down_layer2 = nn.Linear(self.embed_dims, self.r2, bias=False)
+        self.up_layer2 = nn.Linear(self.r2, self.embed_dims, bias=False)
+        # self.act_func = nn.GELU()
+
+        self.ca = ChannelFilter()
+
+        self.scale = nn.Parameter(torch.tensor(self.scale_init))
+        self.mlp_1 = nn.Linear(self.embed_dims, self.embed_dims)
+        self.mlp_2 = nn.Linear(self.embed_dims, self.embed_dims)
+
+        val = math.sqrt(
+            6.0
+            / float(
+                3 * reduce(mul, (self.patch_size, self.patch_size), 1) + (self.embed_dims * self.low_rank_dim) ** 0.5
+            )
+        )
+        nn.init.uniform_(self.learnable_tokens_a.data, -val, val)
+        nn.init.uniform_(self.learnable_tokens_b.data, -val, val)
+        nn.init.normal_(self.down_layer1.weight, std=1 / self.r1 ** 2)
+        nn.init.zeros_(self.up_layer1.weight)
+        nn.init.normal_(self.down_layer2.weight, std=1 / self.r2 ** 2)
+        nn.init.zeros_(self.up_layer2.weight)
+        nn.init.kaiming_uniform_(self.mlp_1.weight, a=math.sqrt(5))
+        nn.init.kaiming_uniform_(self.mlp_2.weight, a=math.sqrt(5))
+
+    def get_tokens(self, layer: int) -> Tensor:
+        return self.learnable_tokens_a[layer] @ self.learnable_tokens_b[layer]
+
+    def forward(self, feats: Tensor, layer: int, batch_first=False, has_cls_token=True) -> Tensor:
+        if batch_first:
+            feats = feats.permute(1, 0, 2)  # (HW,B,C)
+        if has_cls_token:
+            cls_token, feats = torch.tensor_split(feats, [1], dim=0)
+
+        tokens = self.get_tokens(layer)
+        feats = self.tune_query(feats, tokens, layer) # refined feature
+
+        if has_cls_token:
+            feats = torch.cat([cls_token, feats], dim=0)
+        if batch_first:
+            feats = feats.permute(1, 0, 2)  # (B,HW,C)
+        return feats
+
+    def tune_query(self, feats: Tensor, tokens: Tensor, layers: int) -> Tensor:
+        J = torch.einsum("nbc,mc->nbm", feats, tokens)
+        J = J * (self.embed_dims**-0.5)
+        J = F.softmax(J, dim=-1)
+
+        delta_feat = torch.einsum("nbm,mc->nbc", J[:, :, 1:], self.mlp_1(tokens[1:, :]))
+
+        ca_feats = self.ca(feats)
+        down_up_feat1 = self.up_layer1(self.down_layer1(ca_feats))
+        down_up_feat2 = self.up_layer2(self.down_layer2(ca_feats))
+
+        delta_feat = self.mlp_2(feats + delta_feat)
+        delta_feat = delta_feat * self.scale
+        feats = feats + delta_feat + (down_up_feat1 + down_up_feat2)
+
+        return feats
+
+
+class ChannelAttention(nn.Module):
+    def __init__(self, channel, reduction=16):
+        super().__init__()
+        self.maxpool = nn.AdaptiveMaxPool2d(1)
+        self.avgpool = nn.AdaptiveAvgPool2d(1)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        max_result = self.maxpool(x)
+        avg_result = self.avgpool(x)
+        output = self.sigmoid(max_result + avg_result)
+        return output
+
+class ChannelFilter(nn.Module):
+    def __init__(self, channel=768):
+        super().__init__()
+        self.ca = ChannelAttention(channel)
+
+    def forward(self, x):
+        x = x.permute(1, 0, 2)
+        output = self.ca(x)
+        x = x * output
+        x = x.permute(1, 0, 2)
+        return x

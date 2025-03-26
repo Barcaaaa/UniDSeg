@@ -8,7 +8,7 @@ import torch.nn.functional as F
 from torch import nn
 from timm.models.layers import drop, drop_path, trunc_normal_
 
-from xmuda.models.UniDSeg_clip.lpim import MTP, LST
+from xmuda.models.UniDSeg_clip.lpim import MTP, LST, LSTv1
 
 
 class LayerNorm(nn.LayerNorm):
@@ -178,7 +178,8 @@ class CLIPVisionTransformer(nn.Module):
         self.init_weights(self.pretrained)
 
         self.prompting = MTP(scale_factor=patch_size, embed_dim=width, patch_size=patch_size, num_layers=layers)
-        self.tunability = LST(num_layers=layers, embed_dims=width, patch_size=patch_size)
+        # self.tunability = LST(num_layers=layers, embed_dims=width, patch_size=patch_size)
+        self.tunability = LSTv1(num_layers=layers, embed_dims=width, patch_size=patch_size)
 
     def init_weights(self, pretrained=None):
         pretrained = pretrained or self.pretrained
@@ -214,9 +215,9 @@ class CLIPVisionTransformer(nn.Module):
         x = self.conv1(x)  # shape = [*, width, grid, grid]
         B, C, H, W = x.shape
 
-        feat = self.prompting.init_embed(x)  # [*,416,24]
-        feat_dep = self.prompting.init_embed_dep(dep)  # [*,416,24]
-        feat_fft = self.prompting.init_embed_fft(inp)  # [*,416,24]
+        feat = self.prompting.init_embed(x)  # [*,416,48]
+        feat_dep = self.prompting.init_embed_dep(dep)  # [*,416,48]
+        feat_fft = self.prompting.init_embed_fft(inp)  # [*,416,48]
         prompt = self.prompting.get_prompt(feat, feat_dep, feat_fft)  # layers*[*,416,768]
 
         x = x.reshape(x.shape[0], x.shape[1], -1)  # shape = [*, width, grid ** 2]
